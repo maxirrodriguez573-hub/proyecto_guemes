@@ -1,0 +1,2 @@
+Que el tesorero pueda ver que comercio está abierto, por ejemplo:
+Si quiere algo de la ferretería puede consultar al bot de Telegram que ferreterias está abierto 

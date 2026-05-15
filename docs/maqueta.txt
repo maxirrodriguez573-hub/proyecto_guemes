@@ -1,0 +1,43 @@
+¿Para qué va a hacer el bot? 
+El bot es para registrar recibo de compras y guardar tanto los datos de la compra como la foto del recibo
+
+¿Para quien va a hacer el bot?
+Para el tesorero 
+
+¿Qué va a hacer el bot?
+El bot va a guardar fotos del recibo de la compra y quizás la compra y la descripción de la compra para luego registrarlo en una base de dato
+¿Qué datos va a guardar? 
+Los datos van a ser:
+
+OBLIGATORIO
+- Fecha recibo
+- Monto
+
+AUTOMÁTICO
+- Fecha actual
+
+OPCIONAL
+- Descripción
+- Cambiar fecha
+
+SQL:
+
+TABLA GASTO
+- gasto_id -> PK / AI
+- telegram_usuario_id -> NOT NULL, INT
+- categoria_id (FK) -> NOT NULL, INT, FK (CATEGORIA.categoria_id)
+- comercio_id (FK) -> NOT NULL, INT, FK (COMERCIO.comercio_id)
+- fecha -> NOT NULL, TEXT 
+- monto -> NOT NULL, REAL 
+- descripcion NULLEABLE, TEXT
+- recibo_file_id NOT NULL, TEXT
+
+TABLA CATEGORIA (Ferretería, librería, supermecado, limpieza)
+- categoria_id PK / AI
+- nombre NOT NULL, TEXT, UNIQUE
+
+TABLA COMERCIO (112, el enano, Lore, Carrefour)
+- comercio_id PK / AI 
+- nombre NOT NULL, TEXT, UNIQUE
+- dirección NULLEABLE, TEXT (FUTURO) 
+- horario NULLEABLE, TEXT(FUTURO)
