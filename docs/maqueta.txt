@@ -41,3 +41,40 @@ TABLA COMERCIO (112, el enano, Lore, Carrefour)
 - nombre NOT NULL, TEXT, UNIQUE
 - dirección NULLEABLE, TEXT (FUTURO) 
 - horario NULLEABLE, TEXT(FUTURO)
+
+
+
+FUNCIONES DE LAS TABLAS 
+
+TABLA CATEGORIA 
+Esta tabla debe tener datos fijos y el usuario no tendría que añadir los datos pero está la opción.
+
+- AGREGAR CATEGORIA ( nombre ) 
+- ELIMINAR CATEGORIA
+- OBTENER UNA CATEGORIA
+- OBTENER LA LISTA DE CATEGORIAS
+
+TABLA COMERCIO 
+Esta tabla tiene que tener los datos principales del comercio para que después se puedan comparar entre sí. 
+El usuario debería gestionar esta tabla.
+
+- AGREGAR COMERCIO ( nombre, dirección (opcional), horario (opcional) )
+- ELIMINAR COMERCIO
+- OBTENER UN COMERCIO
+- OBTENER LA LISTA DE LOS COMERCIOS
+
+- MODIFICAR NOMBRE DEL COMERCIO
+- MODIFICAR DIRECCIÓN DEL COMERCIO
+- MODIFICAR HORARRIO DEL COMERCIO ( formato fecha y fecha actual por defecto )
+
+
+TABLA GASTO
+Tabla principal donde el usuario lo usará siempre y con datos obligatorios.
+
+- AGREGAR GASTO ( tel_usuario_id , cat_id, comer_id, fecha, monto, descr., recibo_id )
+- ELIMINAR GASTO 
+- OBTENER UN GASTO
+- OBTENER LA LISTA DE GASTOS
+
+- MODIFICAR UN GASTO 
+

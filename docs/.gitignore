@@ -5,7 +5,7 @@ __pycache__/
 # SQLite
 *.db-shm
 *.db-wal
-.sqbpro
+*.sqbpro
 
 # VSCode
 .vscode/
