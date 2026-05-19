@@ -1,3 +1,5 @@
+from database.utils import fetchone
+
 # Agregar categoria
 def agregar_categoria(conn, nombre : str) -> int:
     cursor = conn.cursor()
@@ -28,3 +30,17 @@ def eliminar_categoria(conn, categoria_id : int):
     except Exception as E:
         raise Exception("Error al agregar una categoria.") from E
 
+# Obtener una categoria 
+def obtener_categoria(conn, categoria_id : int) -> dict:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+                       SELECT * FROM CATEGORIA 
+                       WHERE categoria_id = (?)
+                       ''', (categoria_id, ))
+        
+        return fetchone(cursor)
+
+    except Exception as E:
+        raise Exception ("Error al obtener la categoria.")from E
