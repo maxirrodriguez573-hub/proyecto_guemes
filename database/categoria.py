@@ -44,7 +44,8 @@ def obtener_categoria(conn, categoria_id : int) -> dict:
 
     except Exception as E:
         raise Exception ("Error al obtener la categoria.")from E
-    
+
+# Lista de categorias
 def lista_categorias(conn) -> list[dict]:
     cursor = conn.cursor()
 
@@ -57,3 +58,5 @@ def lista_categorias(conn) -> list[dict]:
 
     except Exception as E:
         raise Exception("Error al obtener la lista de categorias") from E
+    
+
