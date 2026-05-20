@@ -4,14 +4,14 @@ from datetime import datetime
 # Agregar gasto
 def agregar_gasto(conn, telegram_usuario_id : int, categoria_id : int, comercio_id : int, monto : float, recibo_file_id : str, descripcion : str|None = None , fecha : str|None = None) -> int:
     if not fecha:
-        fecha : str = datetime.now().strftime("%Y-%m-%d %H:%M",)
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     cursor = conn.cursor()
 
     try:
         cursor.execute('''INSERT INTO GASTO 
                        (telegram_usuario_id, categoria_id, comercio_id, fecha, monto, descripcion, recibo_file_id)
-                       VALUES ((?), (?), (?), (?), (?), (?), (?))
+                       VALUES (?, ?, ?, ?, ?, ?, ?)
                        ''', (telegram_usuario_id, categoria_id, comercio_id, fecha, monto, descripcion, recibo_file_id))
         
         conn.commit()
@@ -27,6 +27,8 @@ def eliminar_gasto(conn, gasto_id : int):
     try:
         cursor.execute('''DELETE FROM GASTO
                        WHERE gasto_id = (?)''', (gasto_id, ))
+        if cursor.rowcount == 0:
+            raise ValueError ("Registro no encontrado.")
         
         conn.commit()
 
@@ -48,7 +50,7 @@ def obtener_gasto(conn, gasto_id : int) -> dict:
         raise Exception ("Error al obtener un gasto") from E
     
 # Obtener lista de gastos
-def lista_gastos(conn) -> list[dict]:
+def obtener_gastos(conn) -> list[dict]:
     cursor = conn.cursor()
 
     try:
@@ -58,3 +60,4 @@ def lista_gastos(conn) -> list[dict]:
 
     except Exception as E:
         raise Exception ("Error al obtener los gastos.") from E
+    
