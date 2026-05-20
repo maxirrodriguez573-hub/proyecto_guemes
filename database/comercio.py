@@ -47,8 +47,8 @@ def obtener_comercio(conn, comercio_id : int) -> dict:
     except Exception as E:
         raise Exception ("Error al obtener la categoria.")from E
 
-# Lista de categorias
-def lista_comercio(conn) -> list[dict]:
+# Lista de comercios
+def obtener_comercios(conn) -> list[dict]:
     cursor = conn.cursor()
 
     try:
