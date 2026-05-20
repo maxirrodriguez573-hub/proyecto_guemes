@@ -7,7 +7,7 @@ def agregar_comercio(conn, nombre : str, direccion : str|None = None, horario : 
     try:
         cursor.execute('''  
                     INSERT INTO COMERCIO (nombre, direccion, horario) 
-                    VALUES ((?), (?), (?))
+                    VALUES (?, ?, ?)
                        ''', (nombre, direccion, horario))
         conn.commit()
         return cursor.lastrowid
@@ -23,6 +23,9 @@ def eliminar_comercio(conn, comercio_id : int):
         cursor.execute('''DELETE FROM COMERCIO
                        WHERE comercio_id = (?)
                        ''', (comercio_id, ))
+        
+        if cursor.rowcount == 0:
+            raise ValueError ("Comercio no encontrado.")
         
         conn.commit()
 
