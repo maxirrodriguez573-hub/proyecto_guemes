@@ -1,7 +1,8 @@
 from database.utils import fetchone, fetchall
+import sqlite3 # Type Hints
 
 # Agregar categoria
-def agregar_categoria(conn, nombre : str) -> int:
+def agregar_categoria(conn : sqlite3.Connection , nombre : str) -> int:
     cursor = conn.cursor()
     
     try:
@@ -11,27 +12,30 @@ def agregar_categoria(conn, nombre : str) -> int:
                        ''', (nombre, ))
         
         conn.commit()
-        return cursor.lastrowid
         
-    except Exception as E:
+    except sqlite3.Error as E:
         raise Exception("Error al agregar una categoria.") from E
+    
+    return cursor.lastrowid
 
 # Eliminar categoria
-def eliminar_categoria(conn, categoria_id : int):
+def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
     cursor = conn.cursor()
     
+    categoria = obtener_categoria(conn, categoria_id) # Validar registro
+
     try:
         cursor.execute('''DELETE FROM CATEGORIA 
                        WHERE categoria_id = (?)
                        ''', (categoria_id, ))
-        
+
         conn.commit()
         
-    except Exception as E:
-        raise Exception("Error al agregar una categoria.") from E
+    except sqlite3.Error as E:
+        raise Exception("Error al eliminar una categoria.") from E
 
 # Obtener una categoria 
-def obtener_categoria(conn, categoria_id : int) -> dict:
+def obtener_categoria(conn : sqlite3.Connection, categoria_id : int) -> dict:
     cursor = conn.cursor()
 
     try:
@@ -40,13 +44,18 @@ def obtener_categoria(conn, categoria_id : int) -> dict:
                        WHERE categoria_id = (?)
                        ''', (categoria_id, ))
         
-        return fetchone(cursor)
-
-    except Exception as E:
+        categoria : dict|None = fetchone(cursor)
+    
+    except sqlite3.Error as E:
         raise Exception ("Error al obtener la categoria.")from E
+    
+    if not categoria:
+        raise ValueError("Error: No existe la categoria.")
+    
+    return categoria
 
 # Lista de categorias
-def lista_categorias(conn) -> list[dict]:
+def obtener_categorias(conn : sqlite3.Connection) -> list[dict]:
     cursor = conn.cursor()
 
     try:
@@ -54,9 +63,39 @@ def lista_categorias(conn) -> list[dict]:
                         SELECT * FROM CATEGORIA
                        ''')
         
-        return fetchall(cursor)
-
-    except Exception as E:
+        categorias : list[dict] = fetchall(cursor)
+       
+    except sqlite3.Error as E:
         raise Exception("Error al obtener la lista de categorias") from E
     
+    return categorias
+    
+# Modificar categoria
+def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : str) -> dict:
+    cursor = conn.cursor()
+
+    categoria : dict = obtener_categoria(conn, categoria_id) # Validar si la categoria existe
+
+    # Validaciones
+    if not isinstance(categoria_id, int) and categoria_id <= 0:
+        raise ValueError ("Colocar categoria_id correcto.")
+
+    if not nombre.strip():
+        raise ValueError ("Colocar un nuevo nombre.")
+
+    try:
+        cursor.execute('''UPDATE CATEGORIA 
+                       SET nombre = (?)
+                       WHERE categoria_id = (?)
+                       ''', (nombre, categoria_id))
+
+        conn.commit()
+
+    except sqlite3.Error as E:
+        raise Exception("Error al modificar una categoria.") from E
+    
+    return categoria 
+    
+
+
 
