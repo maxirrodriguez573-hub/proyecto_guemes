@@ -112,4 +112,19 @@ def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_
         raise Exception ("Error al modificar el gasto.") from E
     
     return cursor.rowcount
+
+# Suma gasto total
+def calcular_gasto_total(conn :sqlite3.Connection) -> float:
+    cursor = conn.cursor()
     
+    try: 
+        cursor.execute('''SELECT SUM(monto) FROM GASTO
+                       ''')
+
+        monto = cursor.fetchone()
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al sumar montos.")
+    
+    return monto[0] or 0
+
