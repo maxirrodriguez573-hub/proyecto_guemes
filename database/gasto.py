@@ -114,17 +114,52 @@ def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_
     return cursor.rowcount
 
 # Suma gasto total
-def calcular_gasto_total(conn :sqlite3.Connection) -> float:
+def calcular_gasto_total(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
     
     try: 
-        cursor.execute('''SELECT SUM(monto) FROM GASTO
+        cursor.execute('''SELECT COALESCE(SUM(monto)) FROM GASTO
                        ''')
 
         monto = cursor.fetchone()
 
     except sqlite3.Error as E:
-        raise Exception ("Error al sumar montos.")
+        raise Exception ("Error al sumar montos.") from E
     
-    return monto[0] or 0
+    return monto[0]
+
+# Suma gasto por mes 
+def calcular_gasto_mes(conn : sqlite3.Connection, mes : int, año : int|None = None) -> float:
+    cursor = conn.cursor()
+    
+    # Validaciones 
+    if not año: # Año actual por defecto
+        año_actual : str = datetime.now().strftime("%Y")
+        año = año_actual
+    
+    if not 2025 <= año <= 2027: # Rango de años inválidos 
+        raise ValueError("Año fuera del rango.")
+
+    if not 0 < mes < 13: # Rango de meses inválidos
+        raise ValueError ("Coloque un número de mes correcto. Ej: (1-12)")
+
+    try:
+        periodo = datetime.strptime(f"{año}-{mes:02}", "%Y-%m") 
+
+    except ValueError as V:
+        raise Exception ("Coloque un año correcto. Ej: AAAA") from V
+
+    try:
+        cursor.execute('''
+                       SELECT ROUND(COALESCE(SUM(monto), 0), 2) FROM GASTO
+                       WHERE strftime("%Y-%m", fecha) = (?)
+                       ''', (periodo.strftime("%Y-%m"), ))
+
+        gasto_mes = cursor.fetchone()
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al intentar calcular el gasto por mes.") from E 
+    
+    return gasto_mes[0]
+
 
