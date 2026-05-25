@@ -70,7 +70,7 @@ def obtener_gastos(conn) -> list[dict]:
     return fetchall(cursor)
     
 # Modificar gasto
-def modificar_gasto(conn : sqlite3.Connection,gasto_id : int , telegram_usuario_id : int|None = None, categoria_id : int|None = None, 
+def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_id : int|None = None, categoria_id : int|None = None, 
                     comercio_id : int|None = None, fecha : str|None = None, monto : float|None = None, recibo_file_id : int|None = None, 
                     descripcion : str|None = None) -> int:
     cursor = conn.cursor()
@@ -97,13 +97,16 @@ def modificar_gasto(conn : sqlite3.Connection,gasto_id : int , telegram_usuario_
         descripcion = gasto["descripcion"]
         
     if recibo_file_id is None:
-        recibo_file_id = gasto[recibo_file_id]
+        recibo_file_id = gasto["recibo_file_id"]
 
     try:
         cursor.execute('''UPDATE GASTO 
                        SET telegram_usuario_id = (?), categoria_id = (?), comercio_id = (?), fecha = (?),
-                       monto = (?), descripcion = (?), recibo_file_id = (?)
-                       ''', telegram_usuario_id, categoria_id, comercio_id, fecha, monto, descripcion, recibo_file_id)
+                       monto = (?), descripcion = (?), recibo_file_id = (?) 
+                       WHERE gasto_id = (?)
+                       ''', (telegram_usuario_id, categoria_id, comercio_id, fecha, monto, descripcion, recibo_file_id, gasto_id))
+        
+        conn.commit()
 
     except sqlite3.Error as E:
         raise Exception ("Error al modificar el gasto.") from E
