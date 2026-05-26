@@ -208,3 +208,35 @@ def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> f
     
     return gasto_categoria[0]
 
+# Obtener gastos entre fechas
+def obtener_gastos_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_final : str) -> list[dict]:
+    cursor = conn.cursor()
+
+    try:
+        fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+        fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d")
+
+    except ValueError as V:
+        raise Exception ("Coloque una fecha correcta.") from V
+
+    # Validaciones
+    if not 2025 <= int(fecha_inicio.strftime("%Y")): # Años invalidos fecha_inicio
+        raise ValueError ("Coloque un año correcto. Ej: YYYY.")
+    
+    if not 2025 <= int(fecha_final.strftime("%Y")) <= 2027: # Años invalidos fecha_final
+        raise ValueError ("Coloque un año correcto. Ej: YYYY")
+    
+    if fecha_inicio > fecha_final: # Diferencia entre fechas 
+        raise ValueError ("Las fechas deben ser ascendentes.")
+
+    try:
+        cursor.execute('''
+                    SELECT * FROM GASTO WHERE fecha BETWEEN (?) AND (?) ORDER BY fecha
+                       ''', (fecha_inicio.strftime("%Y-%m-%d"), fecha_final.strftime("%Y-%m-%d")))
+        
+        gastos = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener gastos entre fechas.") from E
+    
+    return gastos
