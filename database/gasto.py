@@ -162,4 +162,27 @@ def calcular_gasto_mes(conn : sqlite3.Connection, mes : int, año : int|None = N
     
     return gasto_mes[0]
 
+# Suma gasto por comercio
+def calcular_gasto_comercio(conn : sqlite3.Connection, comercio_id : int) -> float:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if not isinstance(comercio_id, int):
+        raise ValueError ("Coloque un comercio_id correcto.")
+    
+    if comercio_id <= 0:
+        raise ValueError ("Coloque un comercio_id correcto.")
+
+    try:
+        cursor.execute('''
+                       SELECT ROUND(COALESCE(SUM(monto), 0), 2) FROM GASTO WHERE comercio_id = (?)
+                       ''', (comercio_id, ))
+
+        gasto_comercio = cursor.fetchone()
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al intentar calcular gasto por comercio.") from E
+    
+    return gasto_comercio[0]
+
 
