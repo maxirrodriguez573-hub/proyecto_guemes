@@ -1,25 +1,3 @@
-SQL:
-
-TABLA GASTO
-- gasto_id -> PK / AI
-- telegram_usuario_id -> NOT NULL, INT
-- categoria_id (FK) -> NOT NULL, INT, FK (CATEGORIA.categoria_id)
-- comercio_id (FK) -> NOT NULL, INT, FK (COMERCIO.comercio_id)
-- fecha -> NOT NULL, TEXT 
-- monto -> NOT NULL, REAL 
-- descripcion NULLEABLE, TEXT
-- recibo_file_id NOT NULL, TEXT
-
-TABLA CATEGORIA (Ferretería, librería, supermecado, limpieza)
-- categoria_id PK / AI
-- nombre NOT NULL, TEXT, UNIQUE
-
-TABLA COMERCIO (112, el enano, Lore, Carrefour)
-- comercio_id PK / AI 
-- nombre NOT NULL, TEXT, UNIQUE
-- dirección NULLEABLE, TEXT (FUTURO) 
-- horario NULLEABLE, TEXT(FUTURO)
-
 
 
 FUNCIONES DE LAS TABLAS 
@@ -41,18 +19,18 @@ El usuario debería gestionar esta tabla.
 - OBTENER UN COMERCIO x
 - OBTENER LA LISTA DE LOS COMERCIOS x
 
-- MODIFICAR NOMBRE DEL COMERCIO
-- MODIFICAR DIRECCIÓN DEL COMERCIO
-- MODIFICAR HORARIO DEL COMERCIO 
+- MODIFICAR NOMBRE DEL COMERCIO x
+- MODIFICAR DIRECCIÓN DEL COMERCIO x
+- MODIFICAR HORARIO DEL COMERCIO  x
 
 
 TABLA GASTO
 Tabla principal donde el usuario lo usará siempre y con datos obligatorios.
 
-- AGREGAR GASTO ( tel_usuario_id , cat_id, comer_id, fecha (por defecto fecha actual), monto, descr., recibo_id )
-- ELIMINAR GASTO 
-- OBTENER UN GASTO
-- OBTENER LA LISTA DE GASTOS
+- AGREGAR GASTO ( tel_usuario_id , cat_id, comer_id, fecha (por defecto fecha actual), monto, descr., recibo_id ) x
+- ELIMINAR GASTO  x
+- OBTENER UN GASTO x
+- OBTENER LA LISTA DE GASTOS x
 
 - MODIFICAR UN GASTO 
 
@@ -61,3 +39,21 @@ VALIDACIONES
 - FUNCIONES DE ELIMINACIÓN y MODIFICACIÓN utilizar .rowcount para verificar si la eliminación fue correcta
 - FUNCIONES DE OBTENER  utilizar fetchone/fetchall para verificar si hay registros
 - FUNCIONES DE AGREGACIÓN utilizar .lastrowid para verificar el id del registro 
+
+FUNCIONES DE LÓGICA Y ANÁLISIS
+GASTO:
+- Sumar gasto total x
+- Sumar gasto por mes
+- Sumar gasto por comercio
+- Sumar gasto por categoria 
+- Obtener gastos entre fechas
+- Obtener últimos gastos (limite=)
+- Buscar gastos por texto
+
+COMERCIO
+- Obtener comercio más usado
+- Obtener cantidad de gasto por comercio
+
+CATEGORIA
+- Obtener categoria más usada
+- Obtener cantidad de gasto por categoria
