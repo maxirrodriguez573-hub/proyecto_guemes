@@ -1,0 +1,24 @@
+SQL:
+
+TABLA GASTO
+- gasto_id -> PK / AI
+- telegram_usuario_id -> NOT NULL, INT
+- categoria_id (FK) -> NOT NULL, INT, FK (CATEGORIA.categoria_id)
+- comercio_id (FK) -> NOT NULL, INT, FK (COMERCIO.comercio_id)
+- fecha -> NOT NULL, TEXT 
+- monto -> NOT NULL, REAL 
+- descripcion NULLEABLE, TEXT
+- recibo_file_id NOT NULL, TEXT
+
+TABLA CATEGORIA (Ferretería, librería, supermecado, limpieza)
+- categoria_id PK / AI
+- nombre NOT NULL, TEXT, UNIQUE
+
+TABLA COMERCIO (112, el enano, Lore, Carrefour)
+- comercio_id PK / AI 
+- nombre NOT NULL, TEXT, UNIQUE
+- dirección NULLEABLE, TEXT (FUTURO) 
+- horario NULLEABLE, TEXT(FUTURO)
+
+
+
