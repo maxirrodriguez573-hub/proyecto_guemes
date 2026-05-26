@@ -185,4 +185,26 @@ def calcular_gasto_comercio(conn : sqlite3.Connection, comercio_id : int) -> flo
     
     return gasto_comercio[0]
 
+# Suma gasto por categoria 
+def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> float:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if not isinstance(categoria_id, int):
+        raise ValueError ("Coloque una categoria_id correcta.")
+    
+    if categoria_id <= 0:
+        raise ValueError("Coloque una categoria_id correcta.")
+    
+    try:
+        cursor.execute('''
+                       SELECT ROUND(COALESCE(SUM(monto), 0), 2) FROM GASTO WHERE categoria_id = (?)
+                       ''', (categoria_id, ))
+        
+        gasto_categoria = cursor.fetchone()
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al intentar calcular gasto por categoria.") from E
+    
+    return gasto_categoria[0]
 
