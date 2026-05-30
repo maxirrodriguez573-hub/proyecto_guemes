@@ -1,6 +1,6 @@
 from database.utils import fetchone, fetchall
 from datetime import datetime
-import sqlite3
+import sqlite3 # Type Hints
 
 # Agregar gasto
 def agregar_gasto(conn : sqlite3.Connection, telegram_usuario_id : int, categoria_id : int, comercio_id : int, monto : float, recibo_file_id : str, descripcion : str|None = None , fecha : str|None = None) -> int:
@@ -209,7 +209,7 @@ def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> f
     return gasto_categoria[0]
 
 # Obtener gastos entre fechas
-def obtener_gastos_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_final : str) -> list[dict]:
+def obtener_gastos_entre_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_final : str) -> list[dict]:
     cursor = conn.cursor()
 
     try:
@@ -231,7 +231,7 @@ def obtener_gastos_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_f
 
     try:
         cursor.execute('''
-                    SELECT * FROM GASTO WHERE fecha BETWEEN (?) AND (?) ORDER BY fecha
+                    SELECT * FROM GASTO WHERE DATE(fecha) BETWEEN (?) AND (?) ORDER BY fecha
                        ''', (fecha_inicio.strftime("%Y-%m-%d"), fecha_final.strftime("%Y-%m-%d")))
         
         gastos = fetchall(cursor)
@@ -240,3 +240,4 @@ def obtener_gastos_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_f
         raise Exception ("Error al obtener gastos entre fechas.") from E
     
     return gastos
+
