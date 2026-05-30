@@ -241,3 +241,22 @@ def obtener_gastos_entre_fechas(conn : sqlite3.Connection, fecha_inicio : str, f
     
     return gastos
 
+# Obtener últimos gastos 
+def obtener_ultimos_gastos(conn : sqlite3.Connection, limit : int = 3) -> list[dict]:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if type(limit) is not int:
+        raise ValueError ("Coloque un número.")
+    
+    if 0 > limit:
+        raise ValueError ("Limit no puede ser negativo.")
+
+    try:
+        cursor.execute('''SELECT * FROM GASTO ORDER BY gasto_id DESC LIMIT (?)
+                       ''', (limit, ))
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener los ultimos gastos.") from E
+    
+    return fetchall(cursor)
