@@ -118,7 +118,7 @@ def calcular_gasto_total(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
     
     try: 
-        cursor.execute('''SELECT COALESCE(SUM(monto)) FROM GASTO
+        cursor.execute('''SELECT COALESCE(SUM(monto), 0.0) FROM GASTO
                        ''')
 
         monto = cursor.fetchone()
@@ -208,6 +208,27 @@ def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> f
     
     return gasto_categoria[0]
 
+# Suma gastos de las categorias
+def suma_gastos_categorias(conn : sqlite3.Connection) -> list[dict]:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+                       SELECT C.nombre, 
+                       COALESCE(ROUND(SUM(monto), 2), 0.0) AS monto 
+                       FROM GASTO G 
+                       JOIN CATEGORIA C 
+                       ON G.categoria_id = C.categoria_id 
+                       GROUP BY G.categoria_id
+                       ''')
+        
+        gastos = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al sumar los gastos por categoria.") from E
+    
+    return gastos
+
 # Obtener gastos entre fechas
 def obtener_gastos_entre_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_final : str) -> list[dict]:
     cursor = conn.cursor()
@@ -260,3 +281,4 @@ def obtener_ultimos_gastos(conn : sqlite3.Connection, limit : int = 3) -> list[d
         raise Exception ("Error al obtener los ultimos gastos.") from E
     
     return fetchall(cursor)
+
