@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# SQLite
+*.db-shm
+*.db-wal
+*.sqbpro
+data/proyecto.db
+
+# VSCode
+.vscode/
+
+# Entornos virtuales
+venv/
+.env/
