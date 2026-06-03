@@ -14,3 +14,7 @@ data/proyecto.db
 # Entornos virtuales
 venv/
 .env/
+
+# Carpetas
+.data/
+.docs/
