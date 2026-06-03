@@ -6,6 +6,7 @@ __pycache__/
 *.db-shm
 *.db-wal
 *.sqbpro
+data/proyecto.db
 
 # VSCode
 .vscode/
