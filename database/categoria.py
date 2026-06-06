@@ -150,3 +150,24 @@ def obtener_categorias_con_mayores_gastos(conn : sqlite3.Connection, limit : int
     
     return categoria
 
+# Obtener los gastos de una categoria
+def obtener_gastos_de_categoria(conn : sqlite3.Connection, categoria_id : int) -> list[dict]:
+    cursor = conn.cursor()
+    
+    # Validaciones
+    if type(categoria_id) is not int:
+        raise ValueError ("Coloque una categoria_id correcta.") 
+    
+    if categoria_id < 1:
+        raise ValueError ("Coloque una categoria_id correcta.")
+    
+    try:
+        cursor.execute('''SELECT * FROM GASTO WHERE categoria_id = (?)
+                       ''', (categoria_id, ))
+        
+        gastos = fetchall(cursor)
+        
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener los gastos de una categoria.") from E
+    
+    return gastos
