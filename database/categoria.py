@@ -96,6 +96,29 @@ def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : 
     
     return categoria 
     
+# Obtener categorias más usadas
+def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
+    cursor = conn.cursor()
 
+    # Validaciones
+    if type(limit) is not int:
+        raise ValueError ("Coloque un número.")
+    
+    if limit != -1 and limit <= 0: 
+        raise ValueError ("Coloque un número mayor a 0.")       
+    try:
+        cursor.execute('''SELECT COUNT(G.gasto_id) AS cantidad_gastos, C.nombre 
+                        FROM GASTO G 
+                        JOIN CATEGORIA C 
+                        ON G.categoria_id = C.categoria_id 
+                        GROUP BY C.categoria_id 
+                        ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
+        
+        categorias = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener las categorias.") from E
+    
+    return categorias
 
 
