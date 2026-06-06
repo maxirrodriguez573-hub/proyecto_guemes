@@ -160,5 +160,25 @@ def obtener_comercios_con_mayores_gastos(conn : sqlite3.Connection, limit : int 
     
     return comercios
 
-
+# Obtener los gastos de un comercio
+def obtener_gastos_de_comercio(conn : sqlite3.Connection, comercio_id : int) -> list[dict]:
+    cursor = conn.cursor()
+    
+    # Validaciones
+    if type(comercio_id) is not int:
+        raise ValueError ("Coloque un comercio_id correcto.") 
+    
+    if comercio_id < 1:
+        raise ValueError ("Coloque un comercio_id correcto.")
+    
+    try:
+        cursor.execute('''SELECT * FROM GASTO WHERE comercio_id = (?)
+                       ''', (comercio_id, ))
+        
+        gastos = fetchall(cursor)
+        
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener los gastos de un comercio.") from E
+    
+    return gastos
 
