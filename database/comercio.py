@@ -104,3 +104,29 @@ def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : st
         raise Exception ("Error al modificar el comercio.") from E
     
     return comercio
+
+# Obtener comercios más usados
+def obtener_comercios_mas_usados(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if type(limit) is not int:
+        raise ValueError ("Coloque un número.")
+    
+    if limit != -1 and limit <= 0: 
+        raise ValueError ("Coloque un número mayor a 0.")       
+    
+    try:
+        cursor.execute('''SELECT COUNT(G.gasto_id) AS cantidad_gastos, C.nombre 
+                        FROM GASTO G 
+                        JOIN COMERCIO C 
+                        ON G.comercio_id = C.comercio_id 
+                        GROUP BY C.comercio_id 
+                        ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
+        
+        comercios = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener los comercios.") from E
+    
+    return comercios
