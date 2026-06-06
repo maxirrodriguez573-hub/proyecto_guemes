@@ -33,7 +33,33 @@ def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
         
     except sqlite3.Error as E:
         raise Exception("Error al eliminar una categoria.") from E
+    
+# Modificar categoria
+def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : str) -> dict:
+    cursor = conn.cursor()
 
+    categoria : dict = obtener_categoria(conn, categoria_id) # Validar si la categoria existe
+
+    # Validaciones
+    if not isinstance(categoria_id, int) and categoria_id <= 0:
+        raise ValueError ("Colocar categoria_id correcto.")
+
+    if not nombre.strip():
+        raise ValueError ("Colocar un nuevo nombre.")
+
+    try:
+        cursor.execute('''UPDATE CATEGORIA 
+                       SET nombre = (?)
+                       WHERE categoria_id = (?)
+                       ''', (nombre, categoria_id))
+
+        conn.commit()
+
+    except sqlite3.Error as E:
+        raise Exception("Error al modificar una categoria.") from E
+    
+    return categoria 
+ 
 # Obtener una categoria 
 def obtener_categoria(conn : sqlite3.Connection, categoria_id : int) -> dict:
     cursor = conn.cursor()
@@ -69,33 +95,7 @@ def obtener_categorias(conn : sqlite3.Connection) -> list[dict]:
         raise Exception("Error al obtener la lista de categorias") from E
     
     return categorias
-    
-# Modificar categoria
-def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : str) -> dict:
-    cursor = conn.cursor()
-
-    categoria : dict = obtener_categoria(conn, categoria_id) # Validar si la categoria existe
-
-    # Validaciones
-    if not isinstance(categoria_id, int) and categoria_id <= 0:
-        raise ValueError ("Colocar categoria_id correcto.")
-
-    if not nombre.strip():
-        raise ValueError ("Colocar un nuevo nombre.")
-
-    try:
-        cursor.execute('''UPDATE CATEGORIA 
-                       SET nombre = (?)
-                       WHERE categoria_id = (?)
-                       ''', (nombre, categoria_id))
-
-        conn.commit()
-
-    except sqlite3.Error as E:
-        raise Exception("Error al modificar una categoria.") from E
-    
-    return categoria 
-    
+   
 # Obtener categorias más usadas
 def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
     cursor = conn.cursor()
@@ -105,7 +105,7 @@ def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -
         raise ValueError ("Coloque un número.")
     
     if limit != -1 and limit <= 0: 
-        raise ValueError ("Coloque un número mayor a 0.")       
+        raise ValueError ("limit debe ser mayor a 0 o -1.")       
     try:
         cursor.execute('''SELECT COUNT(G.gasto_id) AS cantidad_gastos, C.nombre 
                         FROM GASTO G 
@@ -121,4 +121,32 @@ def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -
     
     return categorias
 
+# Obtener categorias con mayores gastos
+def obtener_categorias_con_mayores_gastos(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if type(limit) is not int:
+        raise ValueError ("Coloque un número.")
+
+    if limit != -1 and limit <= 0:
+        raise ValueError ("limit debe ser mayor a 0 o -1.")
+    
+    try:
+        cursor.execute('''
+                        SELECT ROUND(SUM(monto), 2) AS total, C.nombre 
+                        FROM GASTO G 
+                        JOIN CATEGORIA C 
+                        ON G.categoria_id = C.categoria_id 
+                        GROUP BY C.categoria_id 
+                        ORDER BY total DESC
+                        LIMIT (?)
+                        ''', (limit, ))
+        
+        categoria = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener las categoria con mayor gasto.") from E
+    
+    return categoria
 
