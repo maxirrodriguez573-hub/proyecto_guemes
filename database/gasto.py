@@ -205,7 +205,21 @@ def calcular_gasto_minimo(conn : sqlite3.Connection) -> float:
     except sqlite3.Error as E:
         raise Exception ("Error al calcular el gasto mínimo.") from E
     
-    return monto
+    return monto["monto"]
+
+# Calcular gasto maximo 
+def calcular_gasto_maximo(conn : sqlite3.Connection) -> float:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''SELECT COALESCE(ROUND(MAX(monto), 2), 0.0) AS monto from GASTO''')
+
+        monto = fetchone(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al calcular el gasto máximo.") from E
+    
+    return monto["monto"]
 
 # Obtener un gasto 
 def obtener_gasto(conn : sqlite3.Connection, gasto_id : int) -> dict:
