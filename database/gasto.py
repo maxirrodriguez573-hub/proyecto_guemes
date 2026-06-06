@@ -37,37 +37,6 @@ def eliminar_gasto(conn : sqlite3.Connection, gasto_id : int):
 
     except sqlite3.Error as E:
         raise Exception ("Error al eliminar un gasto.") from E
-
-# Obtener un gasto 
-def obtener_gasto(conn : sqlite3.Connection, gasto_id : int) -> dict:
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute('''SELECT * FROM GASTO 
-                       WHERE gasto_id = (?)
-                       ''', (gasto_id, ))
-        
-        gasto = fetchone(cursor)
-
-    except sqlite3.Error as E:
-        raise Exception ("Error al obtener un gasto") from E
-    
-    if not gasto:
-        raise ValueError ("Error: No existe el gasto.")
-
-    return gasto
-    
-# Obtener lista de gastos
-def obtener_gastos(conn) -> list[dict]:
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute('''SELECT * FROM GASTO''')
-
-    except Exception as E:
-        raise Exception ("Error al obtener los gastos.") from E
-    
-    return fetchall(cursor)
     
 # Modificar gasto
 def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_id : int|None = None, categoria_id : int|None = None, 
@@ -207,6 +176,67 @@ def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> f
         raise Exception ("Error al intentar calcular gasto por categoria.") from E
     
     return gasto_categoria[0]
+
+# Calcular promedio de gastos
+def calcular_promedio_gastos(conn : sqlite3.Connection) -> float:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+                    SELECT COALESCE(ROUND(AVG(monto), 2), 0.0) AS promedio FROM GASTO
+                       ''')
+        
+        promedio = fetchone(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al calcular el promedio.") from E
+    
+    return promedio["promedio"]
+
+# Calcular gasto minimo 
+def calcular_gasto_minimo(conn : sqlite3.Connection) -> float:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''SELECT COALESCE(ROUND(MIN(monto), 2), 0.0) AS monto from GASTO''')
+
+        monto = fetchone(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al calcular el gasto mínimo.") from E
+    
+    return monto
+
+# Obtener un gasto 
+def obtener_gasto(conn : sqlite3.Connection, gasto_id : int) -> dict:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''SELECT * FROM GASTO 
+                       WHERE gasto_id = (?)
+                       ''', (gasto_id, ))
+        
+        gasto = fetchone(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener un gasto") from E
+    
+    if not gasto:
+        raise ValueError ("Error: No existe el gasto.")
+
+    return gasto
+    
+# Obtener lista de gastos
+def obtener_gastos(conn) -> list[dict]:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''SELECT * FROM GASTO''')
+
+    except Exception as E:
+        raise Exception ("Error al obtener los gastos.") from E
+    
+    return fetchall(cursor)
 
 # Suma total de gastos de las categorias
 def obtener_totales_por_categoria(conn : sqlite3.Connection) -> list[dict]:
