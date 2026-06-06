@@ -33,42 +33,6 @@ def eliminar_comercio(conn : sqlite3.Connection, comercio_id : int):
     except sqlite3.Error as E:
         raise Exception("Error al eliminar el comercio") from E
 
-# Obtener un comercio
-def obtener_comercio(conn : sqlite3.Connection, comercio_id : int) -> dict:
-    cursor : sqlite3.Cursor = conn.cursor()
-
-    try:
-        cursor.execute('''
-                       SELECT * FROM COMERCIO 
-                       WHERE comercio_id = (?)
-                       ''', (comercio_id, ))
-        
-        comercio : dict|None = fetchone(cursor)
-
-    except sqlite3.Error as E:
-        raise Exception ("Error al obtener la comercio.")from E
-
-    if not comercio:
-            raise ValueError("Error: No existe el comercio.")
-    
-    return comercio
-
-# Lista de comercios
-def obtener_comercios(conn : sqlite3.Connection) -> list[dict]:
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute('''
-                        SELECT * FROM COMERCIO
-                       ''')
-        
-        comercios : list[dict] = fetchall(cursor)
-
-    except sqlite3.Error as E:
-        raise Exception("Error al obtener la lista de comercios") from E
-    
-    return comercios
-
 # Modificar comercio
 def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : str|None = None, direccion : str|None = None, horario : str|None = None) -> dict:
     cursor = conn.cursor()
@@ -105,6 +69,42 @@ def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : st
     
     return comercio
 
+# Obtener un comercio
+def obtener_comercio(conn : sqlite3.Connection, comercio_id : int) -> dict:
+    cursor : sqlite3.Cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+                       SELECT * FROM COMERCIO 
+                       WHERE comercio_id = (?)
+                       ''', (comercio_id, ))
+        
+        comercio : dict|None = fetchone(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener la comercio.")from E
+
+    if not comercio:
+            raise ValueError("Error: No existe el comercio.")
+    
+    return comercio
+
+# Lista de comercios
+def obtener_comercios(conn : sqlite3.Connection) -> list[dict]:
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('''
+                        SELECT * FROM COMERCIO
+                       ''')
+        
+        comercios : list[dict] = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception("Error al obtener la lista de comercios") from E
+    
+    return comercios
+
 # Obtener comercios más usados
 def obtener_comercios_mas_usados(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
     cursor = conn.cursor()
@@ -130,3 +130,35 @@ def obtener_comercios_mas_usados(conn : sqlite3.Connection, limit : int = -1) ->
         raise Exception ("Error al obtener los comercios.") from E
     
     return comercios
+
+# Obtener comercios con mayores gastos
+def obtener_comercios_con_mayores_gastos(conn : sqlite3.Connection, limit : int = -1) -> list[dict]:
+    cursor = conn.cursor()
+
+    # Validaciones
+    if type(limit) is not int:
+        raise ValueError ("Coloque un número.")
+
+    if limit != -1 and limit <= 0:
+        raise ValueError ("limit debe ser mayor a 0 o -1.")
+    
+    try:
+        cursor.execute('''
+                        SELECT ROUND(SUM(monto), 2) AS total, C.nombre 
+                        FROM GASTO G 
+                        JOIN COMERCIO C 
+                        ON G.comercio_id = C.comercio_id 
+                        GROUP BY C.comercio_id 
+                        ORDER BY total DESC
+                        LIMIT (?)
+                        ''', (limit, ))
+        
+        comercios = fetchall(cursor)
+
+    except sqlite3.Error as E:
+        raise Exception ("Error al obtener los comercios con mayor gasto.") from E
+    
+    return comercios
+
+
+
