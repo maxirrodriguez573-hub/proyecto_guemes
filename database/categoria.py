@@ -5,6 +5,13 @@ import sqlite3 # Type Hints
 def agregar_categoria(conn : sqlite3.Connection , nombre : str) -> int:
     cursor = conn.cursor()
     
+    # Validaciones
+    if not isinstance(nombre, str):
+        raise ValueError ("Coloque un nombre correcto.")
+    
+    if not nombre.strip():
+        raise ValueError("Colocar un nombre correcto.")
+    
     try:
         cursor.execute('''INSERT INTO CATEGORIA
                        (nombre) VALUES
@@ -22,7 +29,15 @@ def agregar_categoria(conn : sqlite3.Connection , nombre : str) -> int:
 def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
     cursor = conn.cursor()
     
-    categoria = obtener_categoria(conn, categoria_id) # Validar registro
+    # Validaciones
+    if type(categoria_id) is not int:
+        raise ValueError ("Coloque una categoria_id correcta.")
+    
+    if categoria_id <= 0:
+        raise ValueError ("Coloque una categoria_id correcta.")
+    
+    # Validar registro actual
+    obtener_categoria(conn, categoria_id)
 
     try:
         cursor.execute('''DELETE FROM CATEGORIA 
@@ -37,13 +52,20 @@ def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
 # Modificar categoria
 def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : str) -> dict:
     cursor = conn.cursor()
-
-    categoria : dict = obtener_categoria(conn, categoria_id) # Validar si la categoria existe
-
+ 
     # Validaciones
-    if not isinstance(categoria_id, int) and categoria_id <= 0:
-        raise ValueError ("Colocar categoria_id correcto.")
+    if not isinstance(categoria_id, int):
+        raise ValueError ("Coloque una categoria_id correcta.")
 
+    if not categoria_id <= 0:
+        raise ValueError ("Coloque una categoria_id correcta.")
+
+    # Validar registro actual 
+    categoria = obtener_categoria(conn, categoria_id) 
+
+    if not isinstance(nombre, str):
+        raise ValueError ("Colocar un nuevo nombre.")
+    
     if not nombre.strip():
         raise ValueError ("Colocar un nuevo nombre.")
 
@@ -63,6 +85,13 @@ def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : 
 # Obtener una categoria 
 def obtener_categoria(conn : sqlite3.Connection, categoria_id : int) -> dict:
     cursor = conn.cursor()
+
+    # Validaciones
+    if type(categoria_id) is not int:
+        raise ValueError ("Coloque una categoria_id correcta.")
+    
+    if categoria_id <= 0:
+        raise ValueError ("Coloque una categoria_id correcta.")
 
     try:
         cursor.execute('''
