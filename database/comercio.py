@@ -1,10 +1,27 @@
 from database.utils import fetchone, fetchall
+from datetime import datetime
 import sqlite3 # Type Hints
 
 # Agregar comercio
 def agregar_comercio(conn : sqlite3.Connection, nombre : str, direccion : str|None = None, horario : str|None = None) -> int:
     cursor = conn.cursor()
+    
+    # Validaciones
+    if not isinstance(nombre, str):
+        raise ValueError ("Coloque un nombre correcto.")
+    
+    if not nombre.strip():
+        raise ValueError("Colocar un nombre correcto.")
+    
+    if type(direccion) is not None:
+        if not isinstance(direccion, str):
+            raise ValueError ("Coloque una dirección correcta.")
+        
+    if type(horario) is not None:
+        if not isinstance(horario, str):
+            raise ValueError ("Coloque un horario correcto.")
 
+    # SQL
     try:
         cursor.execute('''  
                     INSERT INTO COMERCIO (nombre, direccion, horario) 
@@ -21,8 +38,17 @@ def agregar_comercio(conn : sqlite3.Connection, nombre : str, direccion : str|No
 def eliminar_comercio(conn : sqlite3.Connection, comercio_id : int):
     cursor = conn.cursor()
     
-    comercio = obtener_comercio(conn, comercio_id) # Validar registro 
+    # Validaciones
+    if type(comercio_id) is not int:
+        raise ValueError ("Coloque un comercio_id correcto.")
+    
+    if comercio_id <= 0:
+        raise ValueError ("Coloque un comercio_id correcto.")
+    
+    # Validar registro 
+    obtener_comercio(conn, comercio_id) 
 
+    # SQL
     try:
         cursor.execute('''DELETE FROM COMERCIO
                        WHERE comercio_id = (?)
@@ -37,17 +63,24 @@ def eliminar_comercio(conn : sqlite3.Connection, comercio_id : int):
 def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : str|None = None, direccion : str|None = None, horario : str|None = None) -> dict:
     cursor = conn.cursor()
 
-    comercio : dict = obtener_comercio(conn, comercio_id) # Validar registro
+    # Validar comercio_id
+    if type(comercio_id) is not int:
+        raise ValueError ("Coloque un comercio_id correcto.")
     
-    # Validaciones
-    if nombre is None and direccion is None and horario is None: # Parámetros obligatorios
+    if comercio_id <= 0:
+        raise ValueError ("Coloque un comercio_id correcto.")
+    
+    # Parámetros obligatorios
+    if nombre is None and direccion is None and horario is None: 
         raise ValueError ("No existen cambios.")
+
+    # Validar registro
+    comercio = obtener_comercio(conn, comercio_id) 
+
+    # Completar datos faltantes
     
     if nombre is None:
         nombre = comercio["nombre"]
-
-    if not nombre.strip():
-        raise ValueError("Colocar un nombre correcto.")
 
     if direccion is None:
         direccion = comercio["direccion"]
@@ -55,6 +88,21 @@ def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : st
     if horario is None:
         horario = comercio["horario"]
 
+    # Validar datos
+    if not isinstance(nombre, str):
+        raise ValueError ("Coloque un nombre correcto.")
+    
+    if not nombre.strip():
+        raise ValueError("Colocar un nombre correcto.")
+
+
+    if not isinstance(direccion, str):
+        raise ValueError ("Coloque una dirección correcta.")
+    if type(horario) is not None:
+        if not isinstance(horario, str):
+            raise ValueError ("Coloque un horario correcto.")
+    
+    # SQL
     try:
         cursor.execute('''
                        UPDATE COMERCIO 
@@ -73,6 +121,7 @@ def modificar_comercio(conn : sqlite3.Connection, comercio_id : int, nombre : st
 def obtener_comercio(conn : sqlite3.Connection, comercio_id : int) -> dict:
     cursor : sqlite3.Cursor = conn.cursor()
 
+    # SQL
     try:
         cursor.execute('''
                        SELECT * FROM COMERCIO 
@@ -93,6 +142,7 @@ def obtener_comercio(conn : sqlite3.Connection, comercio_id : int) -> dict:
 def obtener_comercios(conn : sqlite3.Connection) -> list[dict]:
     cursor = conn.cursor()
 
+    # SQL
     try:
         cursor.execute('''
                         SELECT * FROM COMERCIO
@@ -114,15 +164,16 @@ def obtener_comercios_mas_usados(conn : sqlite3.Connection, limit : int = -1) ->
         raise ValueError ("Coloque un número.")
     
     if limit != -1 and limit <= 0: 
-        raise ValueError ("Coloque un número mayor a 0.")       
+        raise ValueError ("limit debe ser mayor a 0 o -1.")       
     
+    # SQL
     try:
         cursor.execute('''SELECT COUNT(G.gasto_id) AS cantidad_gastos, C.nombre 
                         FROM GASTO G 
                         JOIN COMERCIO C 
                         ON G.comercio_id = C.comercio_id 
                         GROUP BY C.comercio_id 
-                        ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
+                        ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit, ))
         
         comercios = fetchall(cursor)
 
@@ -142,6 +193,7 @@ def obtener_comercios_con_mayores_gastos(conn : sqlite3.Connection, limit : int 
     if limit != -1 and limit <= 0:
         raise ValueError ("limit debe ser mayor a 0 o -1.")
     
+    # SQL
     try:
         cursor.execute('''
                         SELECT ROUND(SUM(monto), 2) AS total, C.nombre 
@@ -168,9 +220,10 @@ def obtener_gastos_de_comercio(conn : sqlite3.Connection, comercio_id : int) -> 
     if type(comercio_id) is not int:
         raise ValueError ("Coloque un comercio_id correcto.") 
     
-    if comercio_id < 1:
+    if comercio_id <= 0:
         raise ValueError ("Coloque un comercio_id correcto.")
     
+    # SQL
     try:
         cursor.execute('''SELECT * FROM GASTO WHERE comercio_id = (?)
                        ''', (comercio_id, ))
