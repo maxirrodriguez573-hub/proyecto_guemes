@@ -12,6 +12,7 @@ def agregar_categoria(conn : sqlite3.Connection , nombre : str) -> int:
     if not nombre.strip():
         raise ValueError("Colocar un nombre correcto.")
     
+    # SQL
     try:
         cursor.execute('''INSERT INTO CATEGORIA
                        (nombre) VALUES
@@ -26,7 +27,7 @@ def agregar_categoria(conn : sqlite3.Connection , nombre : str) -> int:
     return cursor.lastrowid
 
 # Eliminar categoria
-def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
+def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int) -> None:
     cursor = conn.cursor()
     
     # Validaciones
@@ -39,6 +40,7 @@ def eliminar_categoria(conn : sqlite3.Connection, categoria_id : int):
     # Validar registro actual
     obtener_categoria(conn, categoria_id)
 
+    # SQL
     try:
         cursor.execute('''DELETE FROM CATEGORIA 
                        WHERE categoria_id = (?)
@@ -69,6 +71,7 @@ def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : 
     if not nombre.strip():
         raise ValueError ("Colocar un nuevo nombre.")
 
+    # SQL
     try:
         cursor.execute('''UPDATE CATEGORIA 
                        SET nombre = (?)
@@ -93,6 +96,7 @@ def obtener_categoria(conn : sqlite3.Connection, categoria_id : int) -> dict:
     if categoria_id <= 0:
         raise ValueError ("Coloque una categoria_id correcta.")
 
+    # SQL
     try:
         cursor.execute('''
                        SELECT * FROM CATEGORIA 
@@ -113,6 +117,7 @@ def obtener_categoria(conn : sqlite3.Connection, categoria_id : int) -> dict:
 def obtener_categorias(conn : sqlite3.Connection) -> list[dict]:
     cursor = conn.cursor()
 
+    # SQL
     try:
         cursor.execute('''
                         SELECT * FROM CATEGORIA
@@ -134,14 +139,16 @@ def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -
         raise ValueError ("Coloque un número.")
     
     if limit != -1 and limit <= 0: 
-        raise ValueError ("limit debe ser mayor a 0 o -1.")       
+        raise ValueError ("limit debe ser mayor a 0 o -1.")  
+
+    # SQL     
     try:
         cursor.execute('''SELECT COUNT(G.gasto_id) AS cantidad_gastos, C.nombre 
-                        FROM GASTO G 
-                        JOIN CATEGORIA C 
-                        ON G.categoria_id = C.categoria_id 
-                        GROUP BY C.categoria_id 
-                        ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
+                            FROM CATEGORIA C 
+                            LEFT JOIN GASTO G 
+                            ON G.categoria_id = C.categoria_id 
+                            GROUP BY C.categoria_id 
+                            ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
         
         categorias = fetchall(cursor)
 
@@ -161,13 +168,15 @@ def obtener_categorias_con_mayores_gastos(conn : sqlite3.Connection, limit : int
     if limit != -1 and limit <= 0:
         raise ValueError ("limit debe ser mayor a 0 o -1.")
     
+    # SQL
     try:
         cursor.execute('''
-                        SELECT ROUND(SUM(monto), 2) AS total, C.nombre 
-                        FROM GASTO G 
-                        JOIN CATEGORIA C 
-                        ON G.categoria_id = C.categoria_id 
-                        GROUP BY C.categoria_id 
+                        SELECT COALESCE(ROUND(SUM(G.monto), 2), 0.0) AS total,
+                        C.nombre
+                        FROM CATEGORIA C
+                        LEFT JOIN GASTO G
+                        ON G.categoria_id = C.categoria_id
+                        GROUP BY C.categoria_id
                         ORDER BY total DESC
                         LIMIT (?)
                         ''', (limit, ))
@@ -190,6 +199,7 @@ def obtener_gastos_de_categoria(conn : sqlite3.Connection, categoria_id : int) -
     if categoria_id < 1:
         raise ValueError ("Coloque una categoria_id correcta.")
     
+    # SQL
     try:
         cursor.execute('''SELECT * FROM GASTO WHERE categoria_id = (?)
                        ''', (categoria_id, ))
