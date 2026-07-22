@@ -1,0 +1,18 @@
+Verificación en general:
+
+
+gasto.py
+- Verificar el retorno de calcular_gasto_comercio()
+- Verificar el retorno de calcular_gasto_categoria()
+
+
+categoria.py
+Revisar la función obtener_categoria() de la función eliminar_categoria():
+    Está función se asigna a una variable para que se verifique que este exista, si no existe este no se va a asignar a la variable y va 
+    a retornar un error, pero la duda es si hay que contener ese error en un try.
+
+Revisar la función modificar_categoria() ya que este retorna el registro pero dudo si es el registro modificado o el registro antigüo
+
+comercio.py
+modificar el retorno de dato en la función modificar_comercio()
+

@@ -43,17 +43,26 @@ VALIDACIONES
 FUNCIONES DE LÓGICA Y ANÁLISIS
 GASTO:
 - Sumar gasto total x
-- Sumar gasto por mes
-- Sumar gasto por comercio
-- Sumar gasto por categoria 
-- Obtener gastos entre fechas
-- Obtener últimos gastos (limite=)
-- Buscar gastos por texto
+- Sumar gasto por mes x
+- Sumar gasto por comercio x
+- Sumar gasto por categoria x
+
+- Obtener gastos entre fechas x
+- Obtener últimos gastos (limite=) x
+- Obtener total suma de gastos de las categoria x
+- Obtener los gastos de una categoria x
+- Obtener los gastos de un comercio x
+
+- Buscar gastos por texto x
+
+- Calcular promedio de gastos x
+- Calcular gasto mínimo x
+- Calcular gasto máximo x
 
 COMERCIO
-- Obtener comercio más usado
-- Obtener cantidad de gasto por comercio
+- Obtener comercio más usado x
+- Obtener comercios con mayor gastos x
 
 CATEGORIA
-- Obtener categoria más usada
-- Obtener cantidad de gasto por categoria
+- Obtener categoria más usada x
+- Obtener categorias con mayor gastos x

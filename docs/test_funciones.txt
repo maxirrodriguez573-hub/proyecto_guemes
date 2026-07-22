@@ -1,0 +1,18 @@
+test_agregar_categoria()
+    - 
+
+test_obtener_categorias_mas_usadas()
+    - Evaluar si la categoría está en la lista
+    - Evaluar que la cantidad este ordenado de mayor a menor
+    - Evaluar el parámetro limit
+        - limit mayor a 0
+        - limit -1
+    
+test_obtener_categorias_con_mayores_gastos()
+    - Evaluar si la categoría está en la lista 
+    - Evaluar que el total esté ordenado de mayor a menor
+    - Evaluar el parámetro limit 
+        - limit mayor a 0 
+        - limit -1
+
+
