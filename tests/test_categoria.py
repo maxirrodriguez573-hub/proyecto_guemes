@@ -315,7 +315,47 @@ class TestObtenerCategoria:
         with pytest.raises(ValueError):
             obtener_categoria(conn, 999999)
 
+class TestObtenerCategorias:
+    def test_deberia_retornar_lista_vacia_si_no_hay_categorias(self, conn: sqlite3.Connection):
+        categorias = obtener_categorias(conn)
 
+        assert categorias == []
+
+    def test_deberia_retornar_una_unica_categoria(self, conn: sqlite3.Connection, crear_categoria):
+        categoria_id = crear_categoria("categoria_test")
+
+        categorias = obtener_categorias(conn)
+
+        assert len(categorias) == 1
+        assert categorias[0]["categoria_id"] == categoria_id
+        assert categorias[0]["nombre"] == "categoria_test"
+
+
+    def test_deberia_retornar_todas_las_categorias(self, conn: sqlite3.Connection, crear_categoria):
+        crear_categoria("categoria_1")
+        crear_categoria("categoria_2")
+        crear_categoria("categoria_3")
+
+        categorias = obtener_categorias(conn)
+
+        assert len(categorias) == 3
+
+    def test_deberia_retornar_el_contenido_de_todas_las_categorias(self, conn: sqlite3.Connection, crear_categoria):
+        crear_categoria("categoria_1")
+        crear_categoria("categoria_2")
+        crear_categoria("categoria_3")
+
+        nombres = [categoria["nombre"] for categoria in obtener_categorias(conn)]
+
+        assert nombres == ["categoria_1", "categoria_2", "categoria_3"]
+
+    def test_deberia_retornar_una_lista_de_diccionarios(self, conn: sqlite3.Connection, crear_categoria):
+        crear_categoria()
+
+        categorias = obtener_categorias(conn)
+
+        assert isinstance(categorias, list)
+        assert isinstance(categorias[0], dict)
 
 
 
