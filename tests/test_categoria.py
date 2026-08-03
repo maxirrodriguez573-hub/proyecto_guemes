@@ -163,4 +163,106 @@ class TestEliminarCategoria:
 
         assert categorias_nuevas == categorias_viejas
 
-        
+
+class TestModificarCategoria:
+    def test_deberia_modificar_correctamente_el_nombre(self, conn: sqlite3.Connection, crear_categoria):
+
+        categoria_id = crear_categoria("categoria_vieja")
+
+        modificar_categoria(conn, categoria_id, "categoria_nueva")
+
+        categoria = obtener_categoria_por_id(conn, categoria_id)
+
+        assert categoria["nombre"] == "categoria_nueva"
+
+    def test_deberia_retornar_la_categoria_anterior(self, conn: sqlite3.Connection, crear_categoria):
+        categoria_id = crear_categoria("categoria_vieja")
+
+        categoria = modificar_categoria(conn, categoria_id, "categoria_nueva")
+
+        assert categoria["categoria_id"] == categoria_id
+        assert categoria["nombre"] == "categoria_vieja"
+
+    def test_deberia_modificar_solo_la_categoria_indicada(self, conn: sqlite3.Connection, crear_categoria):
+        categoria_1 = crear_categoria("categoria_1")
+        categoria_2 = crear_categoria("categoria_2")
+
+        modificar_categoria(conn, categoria_1, "categoria_modificada")
+
+        categoria = obtener_categoria_por_id(conn, categoria_2)
+
+        assert categoria["nombre"] == "categoria_2"
+
+    @pytest.mark.parametrize("categoria_id",
+        [
+            [],
+            {},
+            "",
+            10.5,
+            None,
+            False,
+            True,
+        ],
+    )
+    def test_deberia_rechazar_tipos_invalidos_para_categoria_id(self, conn: sqlite3.Connection, categoria_id):
+        with pytest.raises(ValueError):
+            modificar_categoria(conn, categoria_id, "categoria_nueva")
+
+    @pytest.mark.parametrize("categoria_id",
+    [
+        0,
+        -1,
+        -50,
+    ],
+)
+    def test_deberia_rechazar_categoria_id_fuera_del_limite(self, conn: sqlite3.Connection, categoria_id):
+        with pytest.raises(ValueError):
+            modificar_categoria(conn, categoria_id, "categoria_nueva")
+
+    @pytest.mark.parametrize("nombre", 
+    [
+        [],
+        {},
+        (),
+        set(),
+        10,
+        10.5,
+        None,
+        False,
+        True,
+    ],
+)
+    def test_deberia_rechazar_tipos_invalidos_para_nombre(self, conn: sqlite3.Connection, crear_categoria, nombre):
+        categoria_id = crear_categoria()
+        categoria = obtener_categoria_por_id(conn, categoria_id)
+
+        with pytest.raises(ValueError):
+            modificar_categoria(conn, categoria_id, nombre)    
+
+        assert categoria["nombre"] == "categoria_test"
+
+    @pytest.mark.parametrize("nombre",
+        [
+            "",
+            " ",
+            "     ",
+            "\t",
+            "\n",
+        ],
+    )
+    def test_deberia_rechazar_nombres_vacios(self, conn: sqlite3.Connection, crear_categoria, nombre):
+        categoria_id = crear_categoria()
+
+        with pytest.raises(ValueError):
+            modificar_categoria(conn, categoria_id, nombre,)
+
+    def test_deberia_lanzar_error_si_el_nombre_ya_existe(self, conn: sqlite3.Connection, crear_categoria):
+        crear_categoria("categoria_1")
+        categoria_id = crear_categoria("categoria_2")
+
+        with pytest.raises(Exception):
+            modificar_categoria(conn, categoria_id, "categoria_1")
+
+    def test_deberia_lanzar_error_si_la_categoria_no_existe(self, conn: sqlite3.Connection):
+        with pytest.raises(ValueError):
+            modificar_categoria(conn, 9999, "categoria_nueva")
