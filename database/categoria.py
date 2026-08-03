@@ -59,7 +59,7 @@ def modificar_categoria(conn : sqlite3.Connection, categoria_id : int, nombre : 
     if not isinstance(categoria_id, int):
         raise ValueError ("Coloque una categoria_id correcta.")
 
-    if not categoria_id <= 0:
+    if categoria_id <= 0:
         raise ValueError ("Coloque una categoria_id correcta.")
 
     # Validar registro actual 
