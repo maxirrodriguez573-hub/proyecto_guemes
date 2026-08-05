@@ -32,6 +32,27 @@ def crear_categoria(conn : sqlite3.Connection) -> callable:
         conn.commit()
 
 @pytest.fixture
+def crear_comercio(conn : sqlite3.Connection) -> callable:
+    comercios_id = []
+
+    def agregar(nombre : str = "comercio_test") -> int:
+        cursor = conn.cursor()
+
+        cursor.execute('''INSERT INTO COMERCIO (nombre)
+                        VALUES (?)''', (nombre, ))
+        conn.commit()
+
+        comercios_id.append(cursor.lastrowid)
+
+        return cursor.lastrowid
+    
+    yield agregar
+    cursor = conn.cursor
+    for comercio_id in comercios_id:
+        cursor.execute("""DELETE FROM COMERCIO WHERE comercio_id == (?)""", (comercio_id, ))
+        conn.commit()
+
+@pytest.fixture
 def crear_gasto(conn : sqlite3.Connection) -> callable:
     gastos_id = []
 
