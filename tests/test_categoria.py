@@ -19,32 +19,11 @@ def obtener_categoria_por_id(conn : sqlite3.Connection, categoria_id : int) -> d
 
         return fetchone(cursor)
 
-
 def eliminar_categoria_por_id(conn : sqlite3.Connection, categoria_id : int):
         cursor = conn.cursor()
 
         cursor.execute("""DELETE FROM CATEGORIA WHERE categoria_id == (?)""", (categoria_id, ))
         conn.commit()
-
-@pytest.fixture
-def crear_categoria(conn : sqlite3.Connection) -> callable:
-    categorias_id = []
-
-    def agregar(nombre : str = "categoria_test") -> int:
-        cursor = conn.cursor()
-
-        cursor.execute('''INSERT INTO CATEGORIA (nombre)
-                        VALUES (?)''', (nombre, ))
-        conn.commit()
-
-        categorias_id.append(cursor.lastrowid)
-
-        return cursor.lastrowid
-    
-    yield agregar
-
-    for categoria_id in categorias_id:
-        eliminar_categoria_por_id(conn, categoria_id)
 
 
 
