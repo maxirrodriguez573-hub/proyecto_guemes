@@ -148,7 +148,8 @@ def obtener_categorias_mas_usadas(conn : sqlite3.Connection, limit : int = -1) -
                             LEFT JOIN GASTO G 
                             ON G.categoria_id = C.categoria_id 
                             GROUP BY C.categoria_id 
-                            ORDER BY cantidad_gastos DESC LIMIT (?)''', (limit,))
+                            ORDER BY cantidad_gastos DESC, C.nombre ASC 
+                            LIMIT (?)''', (limit,))
         
         categorias = fetchall(cursor)
 
@@ -177,7 +178,7 @@ def obtener_categorias_con_mayores_gastos(conn : sqlite3.Connection, limit : int
                         LEFT JOIN GASTO G
                         ON G.categoria_id = C.categoria_id
                         GROUP BY C.categoria_id
-                        ORDER BY total DESC
+                        ORDER BY total DESC, C.nombre ASC
                         LIMIT (?)
                         ''', (limit, ))
         
