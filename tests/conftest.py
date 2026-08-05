@@ -26,7 +26,8 @@ def crear_categoria(conn : sqlite3.Connection) -> callable:
         return cursor.lastrowid
     
     yield agregar
-    cursor = conn.cursor
+    
+    cursor = conn.cursor()
     for categoria_id in categorias_id:
         cursor.execute("""DELETE FROM CATEGORIA WHERE categoria_id == (?)""", (categoria_id, ))
         conn.commit()
@@ -47,7 +48,8 @@ def crear_comercio(conn : sqlite3.Connection) -> callable:
         return cursor.lastrowid
     
     yield agregar
-    cursor = conn.cursor
+
+    cursor = conn.cursor()
     for comercio_id in comercios_id:
         cursor.execute("""DELETE FROM COMERCIO WHERE comercio_id == (?)""", (comercio_id, ))
         conn.commit()
