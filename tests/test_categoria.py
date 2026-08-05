@@ -336,7 +336,109 @@ class TestObtenerCategorias:
         assert isinstance(categorias, list)
         assert isinstance(categorias[0], dict)
 
+class TestObtenerCategoriasMasUsadas:
+    def test_deberia_retornar_todas_las_categorias_ordenadas_por_cantidad_de_gastos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_a = crear_categoria("A")
+        categoria_b = crear_categoria("B")
+        categoria_c = crear_categoria("C")
 
+        comercio_id = crear_comercio()
 
+        crear_gasto(categoria_a, comercio_id)
+        crear_gasto(categoria_a, comercio_id)
+        crear_gasto(categoria_a, comercio_id)
 
+        crear_gasto(categoria_b, comercio_id)
 
+        categorias = obtener_categorias_mas_usadas(conn)
+
+        assert categorias == [
+            {"cantidad_gastos": 3, "nombre": "A"},
+            {"cantidad_gastos": 1, "nombre": "B"},
+            {"cantidad_gastos": 0, "nombre": "C"},
+        ]
+
+    def test_deberia_retornar_todas_las_categorias_sin_limit(self, conn, crear_categoria):
+        crear_categoria("A")
+        crear_categoria("B")
+
+        categorias = obtener_categorias_mas_usadas(conn)
+
+        assert len(categorias) == 2
+
+    def test_deberia_retornar_todas_las_categorias_con_limit_menos_uno(self, conn, crear_categoria):
+        crear_categoria("A")
+        crear_categoria("B")
+
+        categorias = obtener_categorias_mas_usadas(conn, -1)
+
+        assert len(categorias) == 2
+
+    def test_deberia_respetar_el_parametro_limit(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_a = crear_categoria("A")
+        categoria_b = crear_categoria("B")
+        categoria_c = crear_categoria("C")
+
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_a, comercio_id)
+        crear_gasto(categoria_a, comercio_id)
+
+        crear_gasto(categoria_b, comercio_id)
+
+        categorias = obtener_categorias_mas_usadas(conn, 2)
+
+        assert len(categorias) == 2
+
+    def test_deberia_retornar_correctamente_los_datos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("Ferretería")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id)
+        crear_gasto(categoria_id, comercio_id)
+
+        categoria = obtener_categorias_mas_usadas(conn)[0]
+
+        assert categoria["nombre"] == "Ferretería"
+        assert categoria["cantidad_gastos"] == 2
+
+    @pytest.mark.parametrize("limit",
+        [[], {}, None, 10.5, "", True, False],
+    )
+    def test_deberia_rechazar_tipos_invalidos_para_limit(self, conn, limit):
+        with pytest.raises(ValueError):
+            obtener_categorias_mas_usadas(conn, limit)
+
+    @pytest.mark.parametrize("limit",
+        [0, -2, -100],
+    )
+    def test_deberia_rechazar_limit_fuera_del_rango(self, conn, limit):
+        with pytest.raises(ValueError):
+            obtener_categorias_mas_usadas(conn, limit)
+
+    def test_deberia_lanzar_error_si_no_existen_categorias(self, conn):
+            assert obtener_categorias_mas_usadas(conn) == []
+
+    def test_deberia_incluir_categorias_sin_gastos(self, conn, crear_categoria):
+        crear_categoria("A")
+        crear_categoria("B")
+
+        categorias = obtener_categorias_mas_usadas(conn)
+
+        assert categorias == [
+            {"cantidad_gastos": 0, "nombre": "A"},
+            {"cantidad_gastos": 0, "nombre": "B"},
+        ]
+
+    def test_deberia_retornar_una_categoria_con_limit_uno(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_a = crear_categoria("A")
+        categoria_b = crear_categoria("B")
+
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_a, comercio_id)
+
+        categorias = obtener_categorias_mas_usadas(conn, 1)
+
+        assert len(categorias) == 1
+        assert categorias[0]["nombre"] == "A"
