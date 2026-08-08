@@ -585,4 +585,78 @@ class TestObtenerCategoriasConMayoresGastos:
 
         assert categorias[0]["total"] == 150.58
 
+class TestObtenerGastosDeCategoria:
+    def test_deberia_retornar_todos_los_gastos_de_la_categoria(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("A")
+        comercio_id = crear_comercio()
+
+        gasto_1 = crear_gasto(categoria_id, comercio_id, monto=100)
+        gasto_2 = crear_gasto(categoria_id, comercio_id, monto=250)
+
+        gastos = obtener_gastos_de_categoria(conn, categoria_id)
+
+        assert [gasto["gasto_id"] for gasto in gastos] == [gasto_1, gasto_2]
+
+    def test_deberia_retornar_los_datos_correctos_de_los_gastos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("A")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id, telegram_usuario_id=123, fecha="2026-08-01 15:30", monto=150.50, descripcion="Compra de materiales", recibo_file_id="recibo123")
+
+        gastos = obtener_gastos_de_categoria(conn, categoria_id)
+
+        assert gastos[0]["telegram_usuario_id"] == 123
+        assert gastos[0]["categoria_id"] == categoria_id
+        assert gastos[0]["comercio_id"] == comercio_id
+        assert gastos[0]["fecha"] == "2026-08-01 15:30"
+        assert gastos[0]["monto"] == 150.50
+        assert gastos[0]["descripcion"] == "Compra de materiales"
+        assert gastos[0]["recibo_file_id"] == "recibo123"
+
+    def test_deberia_retornar_solo_los_gastos_de_la_categoria_indicada(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_a = crear_categoria("A")
+        categoria_b = crear_categoria("B")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_a, comercio_id, monto=100)
+        crear_gasto(categoria_b, comercio_id, monto=200)
+
+        gastos = obtener_gastos_de_categoria(conn, categoria_a)
+
+        assert len(gastos) == 1
+        assert gastos[0]["categoria_id"] == categoria_a
+        assert gastos[0]["monto"] == 100
+
+    def test_deberia_retornar_lista_vacia_si_la_categoria_no_tiene_gastos(self,  conn, crear_categoria):
+        categoria_id = crear_categoria("A")
+
+        gastos = obtener_gastos_de_categoria(conn, categoria_id)
+
+        assert gastos == []
+
+    def test_deberia_retornar_gastos_con_monto_cero(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("A")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id, monto=0)
+
+        gastos = obtener_gastos_de_categoria(conn, categoria_id)
+
+        assert len(gastos) == 1
+        assert gastos[0]["monto"] == 0
+
+    @pytest.mark.parametrize("categoria_id",
+        [[], {}, 10.5, None, False, True],
+    )
+    def test_deberia_rechazar_tipos_invalidos_para_categoria_id(self, conn, categoria_id):
+        with pytest.raises(ValueError):
+            obtener_gastos_de_categoria(conn, categoria_id)
+
+    @pytest.mark.parametrize("categoria_id",
+    [0, -1, -50],
+    )
+    def test_deberia_rechazar_categoria_id_fuera_del_limite(self, conn, categoria_id):
+        with pytest.raises(ValueError):
+            obtener_gastos_de_categoria(conn, categoria_id)
+
 
