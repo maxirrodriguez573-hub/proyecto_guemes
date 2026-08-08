@@ -442,3 +442,147 @@ class TestObtenerCategoriasMasUsadas:
 
         assert len(categorias) == 1
         assert categorias[0]["nombre"] == "A"
+
+class TestObtenerCategoriasConMayoresGastos:
+    def test_deberia_retornar_categorias_ordenadas_por_total_de_gastos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_a = crear_categoria("A")
+        categoria_b = crear_categoria("B")
+        categoria_c = crear_categoria("C")
+
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_a, comercio_id, monto=300)
+        crear_gasto(categoria_a, comercio_id, monto=200)
+
+        crear_gasto(categoria_b, comercio_id, monto=100)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias == [
+            {"total": 500.0, "nombre": "A"},
+            {"total": 100.0, "nombre": "B"},
+            {"total": 0.0, "nombre": "C"},
+        ] 
+
+    def test_deberia_calcular_correctamente_el_total_de_gastos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("Ferretería")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id, monto=100)
+        crear_gasto(categoria_id, comercio_id, monto=250.50)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias[0]["total"] == 350.50
+
+    def test_deberia_ordenar_por_nombre_si_los_totales_son_iguales(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_b = crear_categoria("B")
+        categoria_a = crear_categoria("A")
+
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_b, comercio_id, monto=100)
+        crear_gasto(categoria_a, comercio_id, monto=100)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias == [
+            {"total": 100.0, "nombre": "A"},
+            {"total": 100.0, "nombre": "B"},
+        ]
+
+    def test_deberia_incluir_categorias_sin_gastos(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_con_gasto = crear_categoria("A")
+        categoria_sin_gasto = crear_categoria("B")
+
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_con_gasto, comercio_id, monto=100)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias == [
+            {"total": 100.0, "nombre": "A"},
+            {"total": 0.0, "nombre": "B"},
+        ]
+
+    def test_deberia_retornar_cero_si_los_gastos_tienen_monto_cero(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("A")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id, monto=0)
+        crear_gasto(categoria_id, comercio_id, monto=0)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias[0] == {
+            "total": 0.0,
+            "nombre": "A",
+        }
+
+    def test_deberia_retornar_todas_las_categorias_con_limit_menos_uno(self, conn, crear_categoria): 
+        crear_categoria("A")
+        crear_categoria("B")
+        crear_categoria("C")
+
+        categorias = obtener_categorias_con_mayores_gastos(conn, -1)
+
+        assert len(categorias) == 3
+
+    def test_deberia_retornar_una_categoria_con_limit_uno(self, conn, crear_categoria): 
+        crear_categoria("A")
+        crear_categoria("B")
+        crear_categoria("C")
+
+        categorias = obtener_categorias_con_mayores_gastos(conn, 1)
+
+        assert len(categorias) == 1
+
+    def test_deberia_retornar_la_cantidad_de_categorias_especificada_por_limit(self, conn, crear_categoria):
+        crear_categoria("A")
+        crear_categoria("B")
+        crear_categoria("C")
+
+        categorias = obtener_categorias_con_mayores_gastos(conn, 2)
+
+        assert len(categorias) == 2
+
+    def test_deberia_retornar_las_categorias_disponibles_si_limit_es_mayor(self, conn, crear_categoria):
+        crear_categoria("A")
+        crear_categoria("B")
+
+        categorias = obtener_categorias_con_mayores_gastos(conn, 10)
+
+        assert len(categorias) == 2
+
+    @pytest.mark.parametrize("limit",
+        [[], {}, None, 10.5, "", False, True],
+    )
+    def test_deberia_rechazar_tipos_invalidos_para_limit(self, conn, limit):
+        with pytest.raises(ValueError):
+            obtener_categorias_con_mayores_gastos(conn, limit)
+
+    @pytest.mark.parametrize("limit",
+        [0, -2, -10, -100],
+    )
+    def test_deberia_rechazar_limit_fuera_del_rango(self, conn, limit):
+        with pytest.raises(ValueError):
+            obtener_categorias_con_mayores_gastos(conn, limit)
+
+    def test_deberia_retornar_lista_vacia_si_no_existen_categorias(self, conn):
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias == []
+
+    def test_deberia_redondear_el_total_a_dos_decimales(self, conn, crear_categoria, crear_comercio, crear_gasto):
+        categoria_id = crear_categoria("A")
+        comercio_id = crear_comercio()
+
+        crear_gasto(categoria_id, comercio_id, monto=100.123)
+        crear_gasto(categoria_id, comercio_id, monto=50.456)
+
+        categorias = obtener_categorias_con_mayores_gastos(conn)
+
+        assert categorias[0]["total"] == 150.58
+
+
