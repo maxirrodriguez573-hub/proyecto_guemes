@@ -78,3 +78,13 @@ def crear_gasto(conn : sqlite3.Connection) -> callable:
     for gasto_id in gastos_id:
         cursor.execute("""DELETE FROM GASTO WHERE gasto_id == (?)""", (gasto_id, ))
         conn.commit()
+
+@pytest.fixture
+def eliminar_gastos(conn : sqlite3.Connection):
+    yield
+
+    cursor = conn.cursor()
+
+    cursor.execute('''DELETE FROM GASTO''')
+
+    conn.commit()
