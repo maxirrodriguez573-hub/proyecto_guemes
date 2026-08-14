@@ -38,9 +38,9 @@ def agregar_gasto(conn : sqlite3.Connection, telegram_usuario_id : int, categori
     if descripcion is not None and not isinstance(descripcion, str):
         raise ValueError ("Coloque una descripción correcta.") 
 
-    if not fecha:
+    if fecha is None:
         fecha = datetime.now()
-
+    
     else:
         try:
             fecha = datetime.strptime(fecha, "%Y-%m-%d %H:%M")
