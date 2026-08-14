@@ -2,7 +2,7 @@ from database.utils import fetchone, fetchall
 from datetime import datetime
 import sqlite3 # Type Hints
 
-# Agregar gasto
+
 def agregar_gasto(conn : sqlite3.Connection, telegram_usuario_id : int, categoria_id : int, comercio_id : int, monto : float,
                 recibo_file_id : str, descripcion : str|None = None , fecha : str|None = None) -> int:
     cursor = conn.cursor()
@@ -35,7 +35,7 @@ def agregar_gasto(conn : sqlite3.Connection, telegram_usuario_id : int, categori
     if not isinstance(recibo_file_id, str):
         raise ValueError ("Coloque el recibo_file_id correcto.")  
 
-    if not isinstance(descripcion, str):
+    if descripcion is not None and not isinstance(descripcion, str):
         raise ValueError ("Coloque una descripción correcta.") 
 
     if not fecha:
@@ -67,8 +67,8 @@ def agregar_gasto(conn : sqlite3.Connection, telegram_usuario_id : int, categori
     
     return cursor.lastrowid
     
-# Eliminar gasto
-def eliminar_gasto(conn : sqlite3.Connection, gasto_id : int):
+
+def eliminar_gasto(conn : sqlite3.Connection, gasto_id : int) -> None: 
     cursor = conn.cursor()
 
     # Validaciones    
@@ -91,7 +91,7 @@ def eliminar_gasto(conn : sqlite3.Connection, gasto_id : int):
     except sqlite3.Error as E:
         raise Exception ("Error al eliminar un gasto.") from E
     
-# Modificar gasto
+
 def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_id : int|None = None, categoria_id : int|None = None, 
                     comercio_id : int|None = None, fecha : str|None = None, monto : float|None = None, recibo_file_id : str|None = None, 
                     descripcion : str|None = None) -> int:
@@ -192,7 +192,7 @@ def modificar_gasto(conn : sqlite3.Connection, gasto_id : int, telegram_usuario_
     
     return cursor.rowcount
 
-# Suma gasto total
+
 def calcular_gasto_total(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
     
@@ -208,7 +208,7 @@ def calcular_gasto_total(conn : sqlite3.Connection) -> float:
     
     return monto[0]
 
-# Suma gasto por mes 
+ 
 def calcular_gasto_mes(conn : sqlite3.Connection, mes : int, año : int|None = None) -> float:
     cursor = conn.cursor()
     
@@ -243,7 +243,7 @@ def calcular_gasto_mes(conn : sqlite3.Connection, mes : int, año : int|None = N
     
     return gasto_mes[0]
 
-# Suma gasto por comercio
+
 def calcular_gasto_comercio(conn : sqlite3.Connection, comercio_id : int) -> float:
     cursor = conn.cursor()
 
@@ -267,7 +267,7 @@ def calcular_gasto_comercio(conn : sqlite3.Connection, comercio_id : int) -> flo
     
     return gasto_comercio[0]
 
-# Suma gasto por categoria 
+ 
 def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> float:
     cursor = conn.cursor()
 
@@ -291,7 +291,7 @@ def calcular_gasto_categoria(conn : sqlite3.Connection, categoria_id : int) -> f
     
     return gasto_categoria[0]
 
-# Calcular promedio de gastos
+
 def calcular_promedio_gastos(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
 
@@ -308,7 +308,7 @@ def calcular_promedio_gastos(conn : sqlite3.Connection) -> float:
     
     return promedio["promedio"]
 
-# Calcular gasto minimo 
+
 def calcular_gasto_minimo(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
 
@@ -323,7 +323,7 @@ def calcular_gasto_minimo(conn : sqlite3.Connection) -> float:
     
     return monto["monto"]
 
-# Calcular gasto maximo 
+
 def calcular_gasto_maximo(conn : sqlite3.Connection) -> float:
     cursor = conn.cursor()
 
@@ -338,7 +338,7 @@ def calcular_gasto_maximo(conn : sqlite3.Connection) -> float:
     
     return monto["monto"]
 
-# Obtener un gasto 
+
 def obtener_gasto(conn : sqlite3.Connection, gasto_id : int) -> dict:
     cursor = conn.cursor()
 
@@ -358,7 +358,7 @@ def obtener_gasto(conn : sqlite3.Connection, gasto_id : int) -> dict:
 
     return gasto
     
-# Obtener lista de gastos
+
 def obtener_gastos(conn) -> list[dict]:
     cursor = conn.cursor()
 
@@ -371,7 +371,7 @@ def obtener_gastos(conn) -> list[dict]:
     
     return fetchall(cursor)
 
-# Suma total de gastos de las categorias
+
 def obtener_totales_por_categoria(conn : sqlite3.Connection) -> list[dict]:
     cursor = conn.cursor()
 
@@ -393,7 +393,7 @@ def obtener_totales_por_categoria(conn : sqlite3.Connection) -> list[dict]:
     
     return gastos
 
-# Obtener gastos entre fechas
+
 def obtener_gastos_entre_fechas(conn : sqlite3.Connection, fecha_inicio : str, fecha_final : str) -> list[dict]:
     cursor = conn.cursor()
 
@@ -427,7 +427,7 @@ def obtener_gastos_entre_fechas(conn : sqlite3.Connection, fecha_inicio : str, f
     
     return gastos
 
-# Obtener últimos gastos 
+
 def obtener_ultimos_gastos(conn : sqlite3.Connection, limit : int = 3) -> list[dict]:
     cursor = conn.cursor()
 
@@ -448,7 +448,6 @@ def obtener_ultimos_gastos(conn : sqlite3.Connection, limit : int = 3) -> list[d
     
     return fetchall(cursor)
 
-# Buscar gastos por texto
 def buscar_gastos_por_texto(conn : sqlite3.Connection, texto : str ="") -> list[dict]:
     cursor = conn.cursor()
 
